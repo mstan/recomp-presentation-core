@@ -126,4 +126,20 @@ static inline int retro_presentation_clock_next(RetroPresentationClock *p, uint6
     return 1;
 }
 
+
+/* PSX host policy: retain finite transition debt, with a caller-selected
+ * maximum period count. Returns a deadline to wait for, or zero for an
+ * immediate frame. This is independent of guest time and OS waiting. */
+typedef struct RetroCatchupPacer { uint64_t next_deadline; } RetroCatchupPacer;
+static inline uint64_t retro_catchup_frame_deadline(RetroCatchupPacer *p,
+    uint64_t now,uint64_t period,unsigned max_periods) {
+    if (p->next_deadline == 0 || now >= p->next_deadline + period * max_periods) {
+        p->next_deadline = now + period;
+        return 0;
+    }
+    const uint64_t deadline = p->next_deadline;
+    p->next_deadline += period;
+    return now >= deadline ? 0 : deadline;
+}
+
 #endif
