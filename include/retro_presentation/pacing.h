@@ -142,4 +142,17 @@ static inline uint64_t retro_catchup_frame_deadline(RetroCatchupPacer *p,
     return now >= deadline ? 0 : deadline;
 }
 
+/* Rounded fixed-period host deadlines. Begin returns zero when no wait is
+ * needed; finish preserves cadence except for caller-selected late wakes. */
+static inline int retro_fixed_deadline_begin(uint64_t now, uint64_t* next,
+                                             uint64_t period, int uncapped) {
+    if (uncapped) { *next = now; return 0; }
+    if (now > *next && now - *next > period) { *next = now + period; return 0; }
+    return 1;
+}
+static inline uint64_t retro_fixed_deadline_finish(uint64_t next, uint64_t woke,
+                                                  uint64_t period, uint64_t tolerance) {
+    return woke > next && woke - next > tolerance ? woke + period : next + period;
+}
+
 #endif
