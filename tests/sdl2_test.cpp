@@ -66,6 +66,13 @@ int main() {
                               0xff000004,0xff000004,0xff000005,0xff000006,
                               0xff000000,0xff000000,0xff000000,0xff000000};
     for(unsigned i=0;i<12;i++)CHECK(captured[i]==expected[i]);
+    for(int linear:{0,1}) {
+        CHECK(SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY,linear?"linear":"nearest"));
+        auto *p=rp_sdl2_create(r,SDL_PIXELFORMAT_ARGB8888,w,h,-1);CHECK(p);
+        SDL_ScaleMode mode;CHECK(SDL_GetTextureScaleMode(rp_sdl2_texture(p),&mode)==0);
+        CHECK(mode==(linear?SDL_ScaleModeLinear:SDL_ScaleModeNearest));
+        rp_sdl2_destroy(p);
+    }
     SDL_DestroyRenderer(r);SDL_FreeSurface(surface);
     std::printf("SDL2: %u matched real pixel copies, formats, filtering, sharp/crop, reuse and lifetime; capture stride/alpha/bars pass\n",copies);
 }
