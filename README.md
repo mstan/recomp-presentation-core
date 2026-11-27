@@ -1,5 +1,7 @@
 # recomp-presentation-core
 
+Current licensing and the grant for existing owner contributions are documented in [LICENSE-SCOPE.md](LICENSE-SCOPE.md).
+
 Private host-presentation extraction candidate. No system consumer is integrated
 yet. The implementation extracts Retro-Launcher's owned GL image pipeline:
 uploads and reuse, same-context GPU copies, exact pixel-pair reconstruction,
