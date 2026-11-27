@@ -2,18 +2,20 @@
  * Copyright (c) 2026 Matthew Stanley */
 #include "retro_presentation/sdl2.h"
 #include <limits.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 struct RpSdl2 {
     SDL_Renderer *renderer;
     SDL_Texture *texture, *sharp;
     Uint32 format;
-    int width, height, sharp_w, sharp_h, linear;
+    int width, height, sharp_w, sharp_h, linear, sharp_target_failed;
     unsigned source_w, source_h;
 };
 void rp_sdl2_reset_sharp(RpSdl2 *p) {
     if (!p) return;
-    SDL_DestroyTexture(p->sharp); p->sharp = NULL;
+    if (p->sharp) SDL_DestroyTexture(p->sharp);
+    p->sharp = NULL;
     p->sharp_w = p->sharp_h = 0;
 }
 static void scale_mode(SDL_Texture *t, int linear) {
@@ -32,7 +34,8 @@ int rp_sdl2_resize(RpSdl2 *p, int w, int h) {
     if (!replacement) return 0;
     SDL_SetTextureBlendMode(replacement, SDL_BLENDMODE_NONE);
     scale_mode(replacement, p->linear);
-    SDL_DestroyTexture(p->texture); rp_sdl2_reset_sharp(p);
+    if (p->texture) SDL_DestroyTexture(p->texture);
+    rp_sdl2_reset_sharp(p);
     p->texture = replacement; p->width = w; p->height = h;
     p->source_w = p->source_h = 0;
     return 1;
@@ -48,7 +51,9 @@ RpSdl2 *rp_sdl2_create(SDL_Renderer *renderer, Uint32 format, int w, int h, int 
 }
 void rp_sdl2_destroy(RpSdl2 *p) {
     if (!p) return;
-    rp_sdl2_reset_sharp(p); SDL_DestroyTexture(p->texture); free(p);
+    rp_sdl2_reset_sharp(p);
+    if (p->texture) SDL_DestroyTexture(p->texture);
+    free(p);
 }
 SDL_Texture *rp_sdl2_texture(RpSdl2 *p) { return p ? p->texture : NULL; }
 void rp_sdl2_set_linear(RpSdl2 *p, int linear) {
@@ -88,12 +93,21 @@ static int ensure_sharp(RpSdl2 *p, int w, int h) {
     if (SDL_GetRendererInfo(p->renderer, &info) == 0 &&
         ((info.max_texture_width > 0 && w > info.max_texture_width) ||
          (info.max_texture_height > 0 && h > info.max_texture_height))) {
+        if (!p->sharp_target_failed)
+            fprintf(stderr, "recomp-presentation: sharp target %dx%d exceeds renderer limit %dx%d; using nearest fallback\n",
+                    w,h,info.max_texture_width,info.max_texture_height);
+        p->sharp_target_failed = 1;
         rp_sdl2_reset_sharp(p); return 0;
     }
     rp_sdl2_reset_sharp(p);
     p->sharp = SDL_CreateTexture(p->renderer, SDL_PIXELFORMAT_RGBA8888,
                                 SDL_TEXTUREACCESS_TARGET, w, h);
-    if (!p->sharp) return 0;
+    if (!p->sharp) {
+        if (!p->sharp_target_failed)
+            fprintf(stderr, "recomp-presentation: sharp target creation failed: %s; using nearest fallback\n",SDL_GetError());
+        p->sharp_target_failed = 1; return 0;
+    }
+    p->sharp_target_failed = 0;
     p->sharp_w = w; p->sharp_h = h;
     SDL_SetTextureBlendMode(p->sharp, SDL_BLENDMODE_NONE);
     scale_mode(p->sharp, 1); return 1;

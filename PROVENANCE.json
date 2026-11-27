@@ -31,6 +31,33 @@
           "sha256": "7c77c06acf4c847ce2f50719e57229742491ce28f8ffb33659c42a51e911b496"
         }
       ]
+    },
+    {
+      "repository": "https://github.com/mstan/gbarecomp",
+      "revision": "245d289e422ed7057af49b9553c10d2b90a4bd87",
+      "files": [
+        {
+          "path": "src/runtime/presentation_layout.h",
+          "git_blob": "57b8e3bae955325460e6051258e386fcb4f289f9",
+          "sha256": "7facb64fc28a055af18b441d215e8327cb0a0d70f424b8f1e7d59d7155d7e179"
+        },
+        {
+          "path": "src/runtime/host_window.cpp",
+          "git_blob": "d66b0b7378f1120e80f221311c399d29ef5586b7",
+          "sha256": "3c79aee8778520e9915bae9731fd14d34e6a84998ed0c7b97d4839a6bfdd7174"
+        }
+      ]
+    },
+    {
+      "repository": "https://github.com/mstan/smsggrecomp",
+      "revision": "e1601e96b250380a7b7e51fdc837b3c117ae7106",
+      "files": [
+        {
+          "path": "runner/host_sdl.c",
+          "git_blob": "d8e201fa282a8e5dd49eebed961b9d9c3ea910a5",
+          "sha256": "ef453fda74c7b79766b03efc5780e28b550f4c0572d588d1de986c40750b53ff"
+        }
+      ]
     }
   ],
   "changes": [
@@ -38,10 +65,15 @@
     "Per-instance GL procedure dispatch and lifecycle callbacks",
     "Portable CPU RGBA delivery/capture under same session interface",
     "Retained original aspect/integer geometry and rational presentation pacing",
-    "Bounded geometry/allocations and explicit optional backend capabilities"
+    "Bounded geometry/allocations and explicit optional backend capabilities",
+    "Retain qualified7603107 host pacing profiles in canonical provider",
+    "Move GBA exact/adaptive/integer layouts, pointer mapping and sharp prescale into common header",
+    "Move SDL2 upload/sharp texture ownership, geometry caching and allocation halving into borrowed-renderer backend",
+    "Move SMS/Game Gear ARGB capture fit unchanged; keep game/window/UI/clear/present/pacing in adapters"
   ],
   "licenses": {
     "image_pipeline": "MIT",
-    "pacing_header": "PolyForm Noncommercial 1.0.0"
+    "pacing_header": "MIT (owner grant; historical PolyForm notice retained)",
+    "layout_capture_sdl2": "MIT (Matthew Stanley owner contributions)"
   }
 }
